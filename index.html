@@ -31,7 +31,6 @@
   const writeEl = document.getElementById('write');
 
   // Создаём массив данных для новых и шаблонных комментов
-
   const comments = [
     {
       name: 'Глеб Фокин',
@@ -75,6 +74,7 @@
 
     // Назначаем событие на кнопки лайков
     likeEvent();
+    replyComment();
   }
 
   // Функция для обработки лайков
@@ -121,17 +121,13 @@
     const minutes = currentDate.getMinutes();
     const formattedTime = `${hours < 10 ? '0' : ''}${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
 
-    // Создаем новый комментарий
-    const newComment = {
-      name: inputNameEl.value.trim(),
-      comment: inputCommentEl.value.trim(),
+    comments.push({
+      name: filter(inputNameEl.value),
+      comment: filter(inputCommentEl.value),
       time: `${formattedDate} ${formattedTime}`,
-      numLikes: 0, // Изначально у нового комментария нет лайков
-      isLiked: false // Изначально новый комментарий не лайкнут
-    };
-
-    // Добавляем новый комментарий в массив комментариев
-    comments.push(newComment);
+      numLikes: 0,
+      isLiked: false
+    });
 
     // Перерисовываем список комментариев
     renderComments();
@@ -142,6 +138,27 @@
     inputNameEl.style.backgroundColor = '';
     inputCommentEl.style.backgroundColor = '';
   });
+
+  // Функция обработчика клика на комментах
+  function replyComment() {
+    const commentEl = document.querySelectorAll('.comment');
+    commentEl.forEach((el, index) => {
+      el.addEventListener('click', function (e) {
+        // Дублирование комментария для ответа
+        inputCommentEl.value = `QUOTE_BEGIN>${comments[index].name}\n${comments[index].comment}QUOTE_END\n`;
+      });
+    });
+  };
+
+  // Функция для фильтрации HTML-тегов
+  function filter(text) {
+    return text
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      // Выделение репоста коммента 
+      .replaceAll('QUOTE_BEGIN', '<div class="quote">')
+      .replaceAll('QUOTE_END', '</div>');
+  }
 
   // Первичный вывод комментариев
   renderComments();
@@ -171,7 +188,6 @@
   inputCommentEl.addEventListener('keydown', updateWriteButton);
 
   // **************************************** ДОПОЛНИТЕЛЬНО ********************************
-
 </script>
 
 </html>

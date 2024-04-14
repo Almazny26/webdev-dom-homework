@@ -139,6 +139,9 @@ body {
   .add-form-button.disabled {
     background-color: #ccc; 
     cursor: not-allowed; 
+}
 
-    
+
+.quote{
+  background-color: #4599df;
 }
