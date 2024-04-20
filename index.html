@@ -30,40 +30,60 @@
   const inputCommentEl = document.getElementById('input-comment');
   const writeEl = document.getElementById('write');
 
+  // Вывод комментариев с сервера
+  const getFetchPromise = () => {
+
+    let fetchPromise = fetch("https://wedev-api.sky.pro/api/v1/dmitry-karabanov/comments", {
+      method: "GET"
+    });
+
+    fetchPromise.then((response) => {
+      return jsonPromise = response.json();
+    }).then((responseData) => {
+
+      comments = responseData.comments;
+
+      renderComments();
+    });
+
+  };
+  getFetchPromise();
+
+
   // Создаём массив данных для новых и шаблонных комментов
-  const comments = [
-    {
-      name: 'Глеб Фокин',
-      comment: 'Это будет первый комментарий на этой странице',
-      time: '12.02.22 12:18',
-      numLikes: 3,
-      isLiked: false
-    },
-    {
-      name: 'Варвара Н.',
-      comment: 'Мне нравится как оформлена эта страница! ❤',
-      time: '13.02.22 19:22',
-      numLikes: 75,
-      isLiked: true
-    }
-  ];
+  let comments = [];
 
   // Функция для отображения комментариев
   const renderComments = () => {
     const commentsHTML = comments.map((comment, index) => {
+
+      // Преобразуем строку времени в объект Date
+      const commentDate = new Date(comment.date);
+      // Извлекаем необходимые компоненты времени (день, месяц, год, часы, минуты, секунды)
+      const day = commentDate.getDate();
+      const month = commentDate.getMonth() + 1;
+      const year = commentDate.getFullYear();
+      const hours = commentDate.getHours();
+      const minutes = commentDate.getMinutes();
+      const seconds = commentDate.getSeconds();
+      // Формируем отформатированную строку времени
+      const formattedDate = `${day < 10 ? '0' : ''}${day}.${month < 10 ? '0' : ''}${month}.${year}`;
+      const formattedTime = `${hours < 10 ? '0' : ''}${hours}:${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+      // Шаблон вставки коммента
       return `<li class="comment">
         <div class="comment-header">
-          <div>${comment.name}</div>
-          <div>${comment.time}</div>
+          <div>${comment.author.name}</div>
+          <div>${formattedDate} ${formattedTime}</div>
         </div>
         <div class="comment-body">
           <div class="comment-text">
-            ${comment.comment}
+            ${comment.text}
           </div>
         </div>
         <div class="comment-footer">
           <div class="likes">
-            <span class="likes-counter">${comment.numLikes}</span>
+            <span class="likes-counter">${comment.likes}</span>
             <button class="like-button ${comment.isLiked ? "-active-like" : ""}" data-index='${index}'></button>
           </div>
         </div>
@@ -88,7 +108,8 @@
         const index = likeElement.dataset.index;
         const direction = comments[index].isLiked ? -1 : 1;
 
-        comments[index].numLikes += direction;
+        // Заменил название значения likes
+        comments[index].likes += direction;
         comments[index].isLiked = !comments[index].isLiked;
 
         renderComments();
@@ -110,33 +131,48 @@
       return;
     };
 
-    // Определяем формат времени и даты как на образце
-    const currentDate = new Date();
-    const day = currentDate.getDate();
-    const month = currentDate.getMonth() + 1;
-    const year = currentDate.getFullYear();
-    const formattedDate = `${day < 10 ? '0' : ''}${day}.${month < 10 ? '0' : ''}${month}.${year}`;
+    // Проверяем, что в теле запроса переданы text и name
+    if (!inputNameEl.value || !inputCommentEl.value) {
+      const errorMessage = { error: "В теле запроса не передан text или name" };
+      console.error(errorMessage);
+      return;
+    }
 
-    const hours = currentDate.getHours();
-    const minutes = currentDate.getMinutes();
-    const formattedTime = `${hours < 10 ? '0' : ''}${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
+    // Проверяем, что в теле запроса передан JSON
+    try {
+      JSON.parse(JSON.stringify({ text: inputCommentEl.value, name: inputNameEl.value }));
+    } catch (error) {
+      const errorMessage = { error: "В теле запроса передан не JSON" };
+      console.error(errorMessage);
+      return;
+    }
 
-    comments.push({
-      name: filter(inputNameEl.value),
-      comment: filter(inputCommentEl.value),
-      time: `${formattedDate} ${formattedTime}`,
-      numLikes: 0,
-      isLiked: false
+    // Сохранение комментариев на сервер
+    let fetchBroadcast = fetch("https://wedev-api.sky.pro/api/v1/dmitry-karabanov/comments", {
+      method: "POST",
+      body: JSON.stringify({
+        text: inputCommentEl.value,
+        name: inputNameEl.value
+      })
+    }).then(() => {
+
+      // Выводим новый комментарий из сервера на страницу
+      getFetchPromise();
+
     });
 
-    // Перерисовываем список комментариев
-    renderComments();
+
 
     // Очищаем поля ввода после добавления комментария
     inputNameEl.value = '';
     inputCommentEl.value = '';
     inputNameEl.style.backgroundColor = '';
     inputCommentEl.style.backgroundColor = '';
+
+    // Перерисовываем список комментариев
+    renderComments();
+
+
   });
 
   // Функция обработчика клика на комментах
@@ -145,7 +181,7 @@
     commentEl.forEach((el, index) => {
       el.addEventListener('click', function (e) {
         // Дублирование комментария для ответа
-        inputCommentEl.value = `QUOTE_BEGIN>${comments[index].name}\n${comments[index].comment}QUOTE_END\n`;
+        inputCommentEl.value = filter(`QUOTE_BEGIN>${comments[index].author.name}\n${comments[index].text}QUOTE_END\n`);
       });
     });
   };
