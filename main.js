@@ -1,3 +1,5 @@
+import { getTodos } from "./api.js";
+
   // Получаем элементы страницы для дальнейшей работы
   const listEl = document.getElementById('list');
   const inputNameEl = document.getElementById('input-name');
@@ -13,16 +15,9 @@
   const getCommentsFromServer = () => {
     // Показываем сообщение о загрузке
     loadingMessageEl.style.display = 'block';
-    fetch("https://wedev-api.sky.pro/api/v1/dmitry-karabanov/comments", {
-      method: "GET"
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Ошибка при загрузке комментариев');
-        }
-        return response.json();
-      })
-      .then((responseData) => {
+
+// Экспорт из api.js
+    getTodos().then((responseData) => {
         // Сохраняем комментарии в массив
         comments = responseData.comments;
         // Отображаем комментарии на странице
