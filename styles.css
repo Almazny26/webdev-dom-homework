@@ -113,8 +113,9 @@ body {
 
   .add-form-text {
     margin-top: 12px;
-    padding: 22px;
+    padding: 22px; /* сохраняем установленный padding */
     resize: none;
+    width: calc(100% - 44px); /* добавляем ширину, учитывая левый и правый padding */
   }
 
   .add-form-row {

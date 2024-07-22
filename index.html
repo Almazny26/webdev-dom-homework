@@ -9,56 +9,73 @@
 
 <body>
   <div class="container">
+    <!-- Блок для отображения сообщения о загрузке комментариев -->
+    <div id="loading-message" class="loading-message" style="display: none;">Загрузка комментариев...</div>
+
     <ul id="list" class="comments">
-      <!-- переносим данные в массив JS -->
+      <!-- Сюда будут добавляться комментарии -->
     </ul>
+    <!-- Блок для отображения сообщения о добавлении комментария -->
+    <div id="adding-message" class="adding-message" style="display: none;">Комментарий добавляется...</div>
     <div class="add-form">
       <input id="input-name" type="text" class="add-form-name" placeholder="Введите ваше имя" />
-      <textarea id="input-comment" type="textarea" class="add-form-text" placeholder="Введите ваш коментарий"
-        rows="4"></textarea>
+      <textarea id="input-comment" type="textarea" class="add-form-text" placeholder="Введите ваш комментарий" rows="4"></textarea>
       <div class="add-form-row">
         <button id="write" class="add-form-button disabled">Написать</button>
       </div>
     </div>
   </div>
 </body>
-
+ 
 <script>
-  // Выделяем взаимодействующие объекты с которыми нужно работать
+  // Получаем элементы страницы для дальнейшей работы
   const listEl = document.getElementById('list');
   const inputNameEl = document.getElementById('input-name');
   const inputCommentEl = document.getElementById('input-comment');
   const writeEl = document.getElementById('write');
+  const loadingMessageEl = document.getElementById('loading-message');
+  const addingMessageEl = document.getElementById('adding-message');
 
-  // Вывод комментариев с сервера
-  const getFetchPromise = () => {
+  // Изначально скрываем сообщение о загрузке
+  loadingMessageEl.style.display = 'none';
 
-    let fetchPromise = fetch("https://wedev-api.sky.pro/api/v1/dmitry-karabanov/comments", {
+  // Функция для получения комментариев с сервера
+  const getCommentsFromServer = () => {
+    // Показываем сообщение о загрузке
+    loadingMessageEl.style.display = 'block';
+    fetch("https://wedev-api.sky.pro/api/v1/dmitry-karabanov/comments", {
       method: "GET"
-    });
-
-    fetchPromise.then((response) => {
-      return jsonPromise = response.json();
-    }).then((responseData) => {
-
-      comments = responseData.comments;
-
-      renderComments();
-    });
-
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Ошибка при загрузке комментариев');
+        }
+        return response.json();
+      })
+      .then((responseData) => {
+        // Сохраняем комментарии в массив
+        comments = responseData.comments;
+        // Отображаем комментарии на странице
+        renderComments();
+        // Скрываем сообщение о загрузке после получения комментариев
+        loadingMessageEl.style.display = 'none';
+      })
+      .catch((error) => {
+        loadingMessageEl.style.display = 'none';
+        alert(`Не удалось загрузить комментарии. Что-то с интернетом.`);
+      });
   };
-  getFetchPromise();
 
-
-  // Создаём массив данных для новых и шаблонных комментов
+  // Массив для хранения комментариев
   let comments = [];
 
   // Функция для отображения комментариев
   const renderComments = () => {
+    // Формируем HTML для каждого комментария
     const commentsHTML = comments.map((comment, index) => {
-
       // Преобразуем строку времени в объект Date
       const commentDate = new Date(comment.date);
+
       // Извлекаем необходимые компоненты времени (день, месяц, год, часы, минуты, секунды)
       const day = commentDate.getDate();
       const month = commentDate.getMonth() + 1;
@@ -66,11 +83,12 @@
       const hours = commentDate.getHours();
       const minutes = commentDate.getMinutes();
       const seconds = commentDate.getSeconds();
+
       // Формируем отформатированную строку времени
       const formattedDate = `${day < 10 ? '0' : ''}${day}.${month < 10 ? '0' : ''}${month}.${year}`;
       const formattedTime = `${hours < 10 ? '0' : ''}${hours}:${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 
-      // Шаблон вставки коммента
+      // Возвращаем HTML-шаблон для комментария
       return `<li class="comment">
         <div class="comment-header">
           <div>${comment.author.name}</div>
@@ -78,7 +96,7 @@
         </div>
         <div class="comment-body">
           <div class="comment-text">
-            ${comment.text}
+            ${filter(comment.text)}
           </div>
         </div>
         <div class="comment-footer">
@@ -90,14 +108,15 @@
       </li>`;
     }).join('');
 
+    // Вставляем сформированный HTML в элемент списка
     listEl.innerHTML = commentsHTML;
 
-    // Назначаем событие на кнопки лайков
+    // Назначаем события на кнопки лайков и ответов на комментарии
     likeEvent();
     replyComment();
-  }
+  };
 
-  // Функция для обработки лайков
+  // Функция для обработки событий лайков
   function likeEvent() {
     const likes = document.querySelectorAll('.like-button');
 
@@ -105,21 +124,23 @@
       likeElement.addEventListener('click', (e) => {
         e.stopPropagation();
 
+        // Получаем индекс текущего комментария
         const index = likeElement.dataset.index;
         const direction = comments[index].isLiked ? -1 : 1;
 
-        // Заменил название значения likes
+        // Обновляем количество лайков и состояние лайка
         comments[index].likes += direction;
         comments[index].isLiked = !comments[index].isLiked;
 
+        // Перерисовываем комментарии
         renderComments();
-      })
+      });
     }
   }
 
-  // Прописываем дальнейшие действия при нажатии кнопки "Написать"
+  // Обрабатываем нажатие кнопки "Написать"
   writeEl.addEventListener('click', function (e) {
-    // Не даём отправить пустую форму
+    // Проверяем, что поля не пустые
     if (inputNameEl.value === '' || inputCommentEl.value === '') {
       if (inputNameEl.value === '') {
         inputNameEl.style.backgroundColor = 'lightcoral';
@@ -127,9 +148,8 @@
       if (inputCommentEl.value === '') {
         inputCommentEl.style.backgroundColor = 'lightcoral';
       }
-      // Возвращаем
       return;
-    };
+    }
 
     // Проверяем, что в теле запроса переданы text и name
     if (!inputNameEl.value || !inputCommentEl.value) {
@@ -147,32 +167,55 @@
       return;
     }
 
-    // Сохранение комментариев на сервер
-    let fetchBroadcast = fetch("https://wedev-api.sky.pro/api/v1/dmitry-karabanov/comments", {
+    // Скрываем форму и показываем сообщение о добавлении комментария
+    document.querySelector('.add-form').style.display = 'none';
+    addingMessageEl.style.display = 'block';
+
+    // Сохранение комментария на сервере
+    fetch("https://wedev-api.sky.pro/api/v1/dmitry-karabanov/comments", {
       method: "POST",
       body: JSON.stringify({
         text: inputCommentEl.value,
-        name: inputNameEl.value
+        name: inputNameEl.value,
+        forceError: false  // Добавляем параметр forceError для имитации ошибок 500
       })
-    }).then(() => {
+    })
+      .then(response => {
+        // Обработка 400-й ошибки
+        if (response.status === 400) {
+          return response.json().then(error => {
+            throw new Error(`${error.error}`);
+          });
+        }
+        // Обработка 500-й ошибки
+        if (response.status === 500) {
+          throw new Error('Ошибка 500: Серверная ошибка.');
+        }
+        // Обработка успешного ответа
+        if (response.ok) {
+          return response.json();
+        }
+      })
+      .then(() => {
+        getCommentsFromServer();  // Получаем обновленные комментарии с сервера
+      })
+      .then(() => {
+        // Очищаем поля ввода после добавления комментария
+        inputNameEl.value = '';
+        inputCommentEl.value = '';
+        inputNameEl.style.backgroundColor = '';
+        inputCommentEl.style.backgroundColor = '';
 
-      // Выводим новый комментарий из сервера на страницу
-      getFetchPromise();
-
-    });
-
-
-
-    // Очищаем поля ввода после добавления комментария
-    inputNameEl.value = '';
-    inputCommentEl.value = '';
-    inputNameEl.style.backgroundColor = '';
-    inputCommentEl.style.backgroundColor = '';
-
-    // Перерисовываем список комментариев
-    renderComments();
-
-
+        // Показываем форму и скрываем сообщение о добавлении комментария
+        document.querySelector('.add-form').style.display = 'block';
+        addingMessageEl.style.display = 'none';
+      })
+      .catch((error) => {
+        // Обработка ошибок сети и других ошибок
+        alert(`Не удалось добавить комментарий: ${error.message}`);
+        document.querySelector('.add-form').style.display = 'block';
+        addingMessageEl.style.display = 'none';
+      });
   });
 
   // Функция обработчика клика на комментах
@@ -180,6 +223,7 @@
     const commentEl = document.querySelectorAll('.comment');
     commentEl.forEach((el, index) => {
       el.addEventListener('click', function (e) {
+
         // Дублирование комментария для ответа
         inputCommentEl.value = filter(`QUOTE_BEGIN>${comments[index].author.name}\n${comments[index].text}QUOTE_END\n`);
       });
@@ -191,16 +235,34 @@
     return text
       .replaceAll('<', '&lt;')
       .replaceAll('>', '&gt;')
+
       // Выделение репоста коммента 
       .replaceAll('QUOTE_BEGIN', '<div class="quote">')
       .replaceAll('QUOTE_END', '</div>');
   }
 
-  // Первичный вывод комментариев
-  renderComments();
+  // Проверка заполненности полей и активация/деактивация кнопки "Написать"
+  function checkInputFields() {
+    const name = inputNameEl.value.trim();
+    const comment = inputCommentEl.value.trim();
+
+    if (name && comment) {
+      writeEl.classList.remove('disabled');
+    } else {
+      writeEl.classList.add('disabled');
+    }
+  }
+
+  // Слушатели событий для полей ввода
+  inputNameEl.addEventListener('input', checkInputFields);
+  inputCommentEl.addEventListener('input', checkInputFields);
+
+  // Получение комментариев при загрузке страницы
+  getCommentsFromServer();
 
   // **************************************** ДОПОЛНИТЕЛЬНО ********************************
 
+  // Функция для обновления состояния кнопки "Написать"
   function updateWriteButton() {
     const isNameFilled = inputNameEl.value.trim() !== '';
     const isCommentFilled = inputCommentEl.value.trim() !== '';
@@ -208,11 +270,11 @@
     // Если оба поля заполнены, делаем кнопку активной
     if (isNameFilled && isCommentFilled) {
       writeEl.disabled = false;
-      writeEl.classList.remove('disabled'); // Убираем класс disabled (и прописываем его в css! изменяя курсор)
+      writeEl.classList.remove('disabled');
     } else {
       // Если хотя бы одно из полей не заполнено, делаем кнопку неактивной и серой
       writeEl.disabled = true;
-      writeEl.classList.add('disabled'); // Добавляем класс disabled
+      writeEl.classList.add('disabled');
     }
   }
 
