@@ -138,7 +138,10 @@ writeEl.addEventListener('click', function (e) {
 
     // Сохранение комментария на сервере
     // Экспорт из api.js
-    postTodo().then(() => {
+    postTodo({
+        text: inputCommentEl.value,
+        name: inputNameEl.value
+    }).then(() => {
         getCommentsFromServer();  // Получаем обновленные комментарии с сервера
     })
         .then(() => {
