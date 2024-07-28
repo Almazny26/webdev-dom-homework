@@ -3,7 +3,6 @@ import { renderComments } from './renderComments.js';
 import { filter } from './filter.js';
 
 // Получаем элементы страницы для дальнейшей работы
-const listEl = document.getElementById('list'); // Контейнер для списка комментариев
 const inputNameEl = document.getElementById('input-name'); // Поле ввода имени
 const inputCommentEl = document.getElementById('input-comment'); // Поле ввода комментария
 const writeEl = document.getElementById('write'); // Кнопка для отправки комментария
@@ -130,7 +129,7 @@ function replyComment() {
         // Назначаем обработчик клика на каждый комментарий
         el.addEventListener('click', function (e) {
             // Заполняем поле ввода комментария текстом для ответа
-            inputCommentEl.value = filter(`QUOTE_BEGIN>${comments[index].author.name}\n${comments[index].text}QUOTE_END\n`);
+            inputCommentEl.value = (`QUOTE_BEGIN>${comments[index].author.name}\n${comments[index].text}QUOTE_END\n`);
         });
     });
 }
