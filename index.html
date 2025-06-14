@@ -47,24 +47,71 @@
     </ul>
     <div class="add-form">
       <input type="text" class="add-form-name" placeholder="Введите ваше имя" id="yourName" />
-      <textarea type="textarea" class="add-form-text" placeholder="Введите ваш комментарий" rows="4" id="yourComment"></textarea>
+      <textarea type="textarea" class="add-form-text" placeholder="Введите ваш комментарий" rows="4"
+        id="yourComment"></textarea>
       <div class="add-form-row">
         <button class="add-form-button" id="write">Написать</button>
       </div>
     </div>
   </div>
 </body>
-
 <script>
+  // Тут сделал по ID
+  // Получаем доступ к элементам формы по их ID
+  const yourNameEl = document.getElementById('yourName');
+  const yourComment = document.getElementById('yourComment');
+  const writeEl = document.getElementById('write');
 
-// Определяем взаимодействующие элементы
-const yourNameEl = document.getElementById('yourName');
-const yourComment = document.getElementById('yourComment');
-const writeEl = document.getElementById('write');
+  // А тут решил по классам, так проще
+  // Контейнер со всеми комментариями
+  const commentsEl = document.querySelector('.comments');
+  // Все отдельные комментарии
+  const commentEl = document.querySelectorAll('.comment');
+  // Заголовки комментариев
+  const commentHeaderEl = document.querySelectorAll('.comment-header');
+  // Тела комментариев
+  const commentBodyEl = document.querySelectorAll('.comment-body');
+  // Текст комментариев
+  const commentTextEl = document.querySelectorAll('.comment-text');
+  // Футеры комментариев
+  const commentFooterEls = document.querySelectorAll('.comment-footer');
 
+  // Добавляем обработчик события клика на кнопку "Написать"
+  writeEl.addEventListener('click', function (e) {
+    // Получаем значения из полей ввода
+    const name = yourNameEl.value;// Имя пользователя
+    const comment = yourComment.value;// Текст комментария
+    // Формируем текущую дату и время в формате "ДД.ММ.ГГ ЧЧ:ММ"
+    const date = new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString();
 
+    // Проверяем, что оба поля заполнены
+    if (name && comment) {
+      // Сохраняем текущее содержимое списка комментариев
+      const oldHtml = commentsEl.innerHTML;
+      // Добавляем новый комментарий к существующим
+      commentsEl.innerHTML = oldHtml + `<li class="comment">
+          <div class="comment-header">
+            <div>${name}</div>
+            <div>${date}</div>
+          </div>
+          <div class="comment-body">
+            <div class="comment-text">
+              ${comment}
+            </div>
+          </div>
+          <div class="comment-footer">
+            <div class="likes">
+              <span class="likes-counter">0</span>
+              <button class="like-button"></button>
+            </div>
+          </div>
+        </li>`;
 
-
+      // Очищаем поля ввода после добавления комментария
+      yourNameEl.value = '';
+      yourComment.value = '';
+    }
+  });
 </script>
 
 </html>
