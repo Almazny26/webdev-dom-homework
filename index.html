@@ -5,6 +5,13 @@
   <title>Проект "Комменты"</title>
   <meta charset="utf-8" />
   <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Цвет для пустых форм */
+    .error {
+      border: 2px solid rgba(243, 114, 114, 0.8);
+      background-color: rgba(243, 114, 114, 0.1);
+    }
+  </style>
 </head>
 
 <body>
@@ -78,11 +85,36 @@
 
   // Добавляем обработчик события клика на кнопку "Написать"
   writeEl.addEventListener('click', function (e) {
+    // Флаг наличия ошибки
+    let hasError = false;
+
+    // Сброс состояния ошибок перед новой проверкой
+    yourNameEl.classList.remove("error");
+    yourComment.classList.remove("error");
+
+    // Проверка имени
+    if (yourNameEl.value.trim() === '') {
+      yourNameEl.classList.add("error");
+      hasError = true;
+    }
+
+    // Проверка комментария
+    if (yourComment.value.trim() === '') {
+      yourComment.classList.add("error");
+      hasError = true;
+    }
+
+    // Если есть ошибка — не добавлять комментарий
+    if (hasError) return;
+
+
     // Получаем значения из полей ввода
-    const name = yourNameEl.value;// Имя пользователя
-    const comment = yourComment.value;// Текст комментария
+    // Имя пользователя
+    const name = yourNameEl.value.trim();;
+    // Текст комментария
+    const comment = yourComment.value.trim();
     // Формируем текущую дату и время в формате "ДД.ММ.ГГ ЧЧ:ММ"
-    const date = new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString();
+    const date = new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
 
     // Проверяем, что оба поля заполнены
     if (name && comment) {
