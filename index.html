@@ -110,19 +110,19 @@
     likeButtons.forEach((button, index) => {
       button.addEventListener('click', (event) => {
         // Предотвращаем всплытие события
-        event.stopPropagation(); 
+        event.stopPropagation();
 
         // Переключаем лайк: если уже лайкнуто — снимаем, иначе ставим лайк
         if (users[index].isLike) {
           // Снимаем лайк
-          users[index].isLike = false; 
+          users[index].isLike = false;
           // Уменьшаем счетчик
-          users[index].numberLikes--;  
+          users[index].numberLikes--;
         } else {
           // Ставим лайк
           users[index].isLike = true;
           // Увеличиваем счетчик  
-          users[index].numberLikes++;  
+          users[index].numberLikes++;
         }
         // Рендерим комменты после каждого нажатия на лайк
         renderUsers();
@@ -146,6 +146,7 @@
       </div>
     </div>
     <div class="comment-footer">
+          <button class="answer">Ответить</button>
       <div class="likes">
         <span class="likes-counter">${user.numberLikes}</span>
         <button class="like-button${user.isLike ? ' -active-like' : ''}" data-index="${index}"></button>
