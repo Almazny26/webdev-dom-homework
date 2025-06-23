@@ -130,19 +130,29 @@
     });
   };
 
+  // Функция для экранирования HTML
+  function escapeHTML(str) {
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
   // Функция для рендера стоковых комментов 
   const renderUsers = () => {
 
     const usersHtml = users.map((user, index) => {
 
-      return `<li class="comment">
+      return `<li class="comment" data-index="${index}">
     <div class="comment-header">
-      <div>${user.name}</div>
+      <div>${escapeHTML(user.name)}</div>
       <div>${user.time}</div>
     </div>
     <div class="comment-body">
       <div class="comment-text">
-        ${user.comment}
+        ${escapeHTML(user.comment)}
       </div>
     </div>
     <div class="comment-footer">
@@ -158,6 +168,8 @@
     commentsEl.innerHTML = usersHtml;
     // Обработчик лайка
     setLikeListeners();
+    // Обработчик клика на кнопку "Ответить"
+    setCommentClickListeners();
   }
   renderUsers();
 
@@ -208,6 +220,28 @@
       yourComment.value = '';
     }
   });
+
+  // Добавляем обработчик клика на кнопку "Ответить" для цитирования
+  function setCommentClickListeners() {
+    // Находим все кнопки "Ответить" после рендера комментариев
+    const answerButtons = document.querySelectorAll('.answer');
+    // Для каждой кнопки "Ответить" добавляем обработчик события
+    answerButtons.forEach((button) => {
+      button.addEventListener('click', function (e) {
+        e.stopPropagation();
+        // Находим родительский элемент комментария, к которому относится эта кнопка
+        const commentItem = this.closest('.comment');
+        // Получаем индекс комментария из атрибута data-index
+        const index = commentItem.getAttribute('data-index');
+        // Получаем объект пользователя (комментария) по индексу
+        const user = users[index];
+        // Формируем цитату: имя и текст комментария, и подставляем в поле для ввода комментария
+        yourComment.value = `> ${user.name}: ${user.comment}\n`;
+        // Ставим фокус на поле имени
+        yourNameEl.focus();
+      });
+    });
+  }
 </script>
 
 </html>
