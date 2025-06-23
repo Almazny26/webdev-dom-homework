@@ -17,7 +17,7 @@
 <body>
   <div class="container">
     <ul class="comments">
-      <li class="comment">
+      <!-- <li class="comment">
         <div class="comment-header">
           <div>Глеб Фокин</div>
           <div>12.02.22 12:18</div>
@@ -50,7 +50,7 @@
             <button class="like-button -active-like"></button>
           </div>
         </div>
-      </li>
+      </li> -->
     </ul>
     <div class="add-form">
       <input type="text" class="add-form-name" placeholder="Введите ваше имя" id="yourName" />
@@ -63,6 +63,25 @@
   </div>
 </body>
 <script>
+
+  // Массив данных о начальных комментах
+  const users = [
+    {
+      name: "Глеб Фокин",
+      time: "12.02.22 12:18",
+      comment: "Это будет первый комментарий на этой странице",
+      numberLikes: 3,
+      isLike: false
+    },
+    {
+      name: "Варвара Н.",
+      time: "13.02.22 19:22",
+      comment: "Мне нравится как оформлена эта страница! ❤",
+      numberLikes: 3,
+      isLike: true
+    }
+  ];
+
   // Тут сделал по ID
   // Получаем доступ к элементам формы по их ID
   const yourNameEl = document.getElementById('yourName');
@@ -83,27 +102,81 @@
   // Футеры комментариев
   const commentFooterEls = document.querySelectorAll('.comment-footer');
 
+
+  // Обработка клика по лайку
+  const setLikeListeners = () => {
+    // Находим все лайки по классу
+    const likeButtons = document.querySelectorAll('.like-button');
+    likeButtons.forEach((button, index) => {
+      button.addEventListener('click', (event) => {
+        // Предотвращаем всплытие события
+        event.stopPropagation(); 
+
+        // Переключаем лайк: если уже лайкнуто — снимаем, иначе ставим лайк
+        if (users[index].isLike) {
+          // Снимаем лайк
+          users[index].isLike = false; 
+          // Уменьшаем счетчик
+          users[index].numberLikes--;  
+        } else {
+          // Ставим лайк
+          users[index].isLike = true;
+          // Увеличиваем счетчик  
+          users[index].numberLikes++;  
+        }
+        // Рендерим комменты после каждого нажатия на лайк
+        renderUsers();
+      });
+    });
+  };
+
+  // Функция для рендера стоковых комментов 
+  const renderUsers = () => {
+
+    const usersHtml = users.map((user, index) => {
+
+      return `<li class="comment">
+    <div class="comment-header">
+      <div>${user.name}</div>
+      <div>${user.time}</div>
+    </div>
+    <div class="comment-body">
+      <div class="comment-text">
+        ${user.comment}
+      </div>
+    </div>
+    <div class="comment-footer">
+      <div class="likes">
+        <span class="likes-counter">${user.numberLikes}</span>
+        <button class="like-button${user.isLike ? ' -active-like' : ''}" data-index="${index}"></button>
+      </div>
+    </div>
+  </li>`
+    }).join("");
+
+    commentsEl.innerHTML = usersHtml;
+    // Обработчик лайка
+    setLikeListeners();
+  }
+  renderUsers();
+
   // Добавляем обработчик события клика на кнопку "Написать"
   writeEl.addEventListener('click', function (e) {
     // Флаг наличия ошибки
     let hasError = false;
-
     // Сброс состояния ошибок перед новой проверкой
     yourNameEl.classList.remove("error");
     yourComment.classList.remove("error");
-
     // Проверка имени
     if (yourNameEl.value.trim() === '') {
       yourNameEl.classList.add("error");
       hasError = true;
     }
- 
     // Проверка комментария
     if (yourComment.value.trim() === '') {
       yourComment.classList.add("error");
       hasError = true;
     }
-
     // Если есть ошибка — не добавлять комментарий
     if (hasError) return;
 
@@ -118,26 +191,16 @@
 
     // Проверяем, что оба поля заполнены
     if (name && comment) {
-      // Сохраняем текущее содержимое списка комментариев
-      const oldHtml = commentsEl.innerHTML;
-      // Добавляем новый комментарий к существующим
-      commentsEl.innerHTML = oldHtml + `<li class="comment">
-          <div class="comment-header">
-            <div>${name}</div>
-            <div>${date}</div>
-          </div>
-          <div class="comment-body">
-            <div class="comment-text">
-              ${comment}
-            </div>
-          </div>
-          <div class="comment-footer">
-            <div class="likes">
-              <span class="likes-counter">0</span>
-              <button class="like-button"></button>
-            </div>
-          </div>
-        </li>`;
+      // Добавляем новый комментарий к существующим с помощью обновления массива данных
+      users.push({
+        name: yourNameEl.value,
+        time: date,
+        comment: yourComment.value,
+        numberLikes: 0,
+        isLike: false
+      });
+
+      renderUsers();
 
       // Очищаем поля ввода после добавления комментария
       yourNameEl.value = '';
