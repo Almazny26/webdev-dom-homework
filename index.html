@@ -123,8 +123,8 @@
     </div>
     <div class="comment-footer">
       <div class="likes">
-        <span class="likes-counter">0</span>
-        <button class="like-button"></button>
+        <span class="likes-counter">${user.numberLikes}</span>
+        <button class="like-button${user.isLike ? ' -active-like' : ''}" data-index="${index}"></button>
       </div>
     </div>
   </li>`
@@ -138,23 +138,19 @@
   writeEl.addEventListener('click', function (e) {
     // Флаг наличия ошибки
     let hasError = false;
-
     // Сброс состояния ошибок перед новой проверкой
     yourNameEl.classList.remove("error");
     yourComment.classList.remove("error");
-
     // Проверка имени
     if (yourNameEl.value.trim() === '') {
       yourNameEl.classList.add("error");
       hasError = true;
     }
-
     // Проверка комментария
     if (yourComment.value.trim() === '') {
       yourComment.classList.add("error");
       hasError = true;
     }
-
     // Если есть ошибка — не добавлять комментарий
     if (hasError) return;
 
