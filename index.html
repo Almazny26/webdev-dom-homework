@@ -63,6 +63,26 @@
   </div>
 </body>
 <script>
+
+// Массив данных о начальных комментах
+  const users = [
+    {
+      name: "Глеб Фокин",
+      time: "12.02.22 12:18",
+      comment: "Это будет первый комментарий на этой странице",
+      numberLikes: 3,
+      isLike: false
+    },
+    {
+      name: "Варвара Н.",
+      time: "13.02.22 19:22",
+      comment: "Мне нравится как оформлена эта страница! ❤",
+      numberLikes: 3,
+      isLike: true
+    }
+  ]
+
+
   // Тут сделал по ID
   // Получаем доступ к элементам формы по их ID
   const yourNameEl = document.getElementById('yourName');
@@ -87,7 +107,7 @@
   writeEl.addEventListener('click', function (e) {
     // Флаг наличия ошибки
     let hasError = false;
- 
+
     // Сброс состояния ошибок перед новой проверкой
     yourNameEl.classList.remove("error");
     yourComment.classList.remove("error");
@@ -97,7 +117,7 @@
       yourNameEl.classList.add("error");
       hasError = true;
     }
- 
+
     // Проверка комментария
     if (yourComment.value.trim() === '') {
       yourComment.classList.add("error");
