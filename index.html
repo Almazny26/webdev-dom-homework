@@ -17,7 +17,7 @@
 <body>
   <div class="container">
     <ul class="comments">
-      <li class="comment">
+      <!-- <li class="comment">
         <div class="comment-header">
           <div>Глеб Фокин</div>
           <div>12.02.22 12:18</div>
@@ -50,7 +50,7 @@
             <button class="like-button -active-like"></button>
           </div>
         </div>
-      </li>
+      </li> -->
     </ul>
     <div class="add-form">
       <input type="text" class="add-form-name" placeholder="Введите ваше имя" id="yourName" />
@@ -64,7 +64,7 @@
 </body>
 <script>
 
-// Массив данных о начальных комментах
+  // Массив данных о начальных комментах
   const users = [
     {
       name: "Глеб Фокин",
@@ -80,7 +80,9 @@
       numberLikes: 3,
       isLike: true
     }
-  ]
+  ];
+
+
 
 
   // Тут сделал по ID
@@ -102,6 +104,35 @@
   const commentTextEl = document.querySelectorAll('.comment-text');
   // Футеры комментариев
   const commentFooterEls = document.querySelectorAll('.comment-footer');
+
+
+  // Функция для рендера стоковых комментов 
+  const renderUsers = () => {
+
+    const usersHtml = users.map((user, index) => {
+
+      return `<li class="comment">
+    <div class="comment-header">
+      <div>${user.name}</div>
+      <div>${user.time}</div>
+    </div>
+    <div class="comment-body">
+      <div class="comment-text">
+        ${user.comment}
+      </div>
+    </div>
+    <div class="comment-footer">
+      <div class="likes">
+        <span class="likes-counter">0</span>
+        <button class="like-button"></button>
+      </div>
+    </div>
+  </li>`
+    }).join("");
+
+    commentsEl.innerHTML = usersHtml;
+  }
+  renderUsers();
 
   // Добавляем обработчик события клика на кнопку "Написать"
   writeEl.addEventListener('click', function (e) {
