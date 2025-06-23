@@ -142,3 +142,13 @@ body {
 .add-form-button:hover {
   opacity: 0.9;
 }
+
+.comment-quote {
+  font-style: italic;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.comment-message {
+  white-space: pre-wrap;
+}

@@ -16,42 +16,7 @@
 
 <body>
   <div class="container">
-    <ul class="comments">
-      <!-- <li class="comment">
-        <div class="comment-header">
-          <div>Глеб Фокин</div>
-          <div>12.02.22 12:18</div>
-        </div>
-        <div class="comment-body">
-          <div class="comment-text">
-            Это будет первый комментарий на этой странице
-          </div>
-        </div>
-        <div class="comment-footer">
-          <div class="likes">
-            <span class="likes-counter">3</span>
-            <button class="like-button"></button>
-          </div>
-        </div>
-      </li>
-      <li class="comment">
-        <div class="comment-header">
-          <div>Варвара Н.</div>
-          <div>13.02.22 19:22</div>
-        </div>
-        <div class="comment-body">
-          <div class="comment-text">
-            Мне нравится как оформлена эта страница! ❤
-          </div>
-        </div>
-        <div class="comment-footer">
-          <div class="likes">
-            <span class="likes-counter">75</span>
-            <button class="like-button -active-like"></button>
-          </div>
-        </div>
-      </li> -->
-    </ul>
+    <ul class="comments"></ul>
     <div class="add-form">
       <input type="text" class="add-form-name" placeholder="Введите ваше имя" id="yourName" />
       <textarea type="textarea" class="add-form-text" placeholder="Введите ваш комментарий" rows="4"
@@ -145,6 +110,28 @@
 
     const usersHtml = users.map((user, index) => {
 
+
+      // Разделение цитаты и комментария
+      let quotedText = '';
+      let actualComment = user.comment;
+
+      // Если комментарий начинается с > — значит, это ответ с цитатой
+      if (user.comment.startsWith('>')) {
+
+        // Разбиваем весь комментарий на строки по переносу (\n)
+        const lines = user.comment.split('\n');
+
+        // Фильтруем строки, которые начинаются с символа '>'
+        const quoteLines = lines.filter(line => line.startsWith('>'));
+
+        // Каждую строку цитаты экранируем
+        // И соединяем обратно в текст с тегами <br> для переноса строк в HTML
+        quotedText = quoteLines.map(line => escapeHTML(line)).join('<br>');
+
+        // Отрезаем первые строки и соединяем обратно
+        actualComment = lines.slice(quoteLines.length).join('\n').trim();
+      }
+
       return `<li class="comment" data-index="${index}">
     <div class="comment-header">
       <div>${escapeHTML(user.name)}</div>
@@ -152,7 +139,8 @@
     </div>
     <div class="comment-body">
       <div class="comment-text">
-        ${escapeHTML(user.comment)}
+        ${quotedText ? `<div class="comment-quote">${quotedText}</div>` : ''}
+        ${escapeHTML(actualComment)}
       </div>
     </div>
     <div class="comment-footer">
@@ -236,7 +224,7 @@
         // Получаем объект пользователя (комментария) по индексу
         const user = users[index];
         // Формируем цитату: имя и текст комментария, и подставляем в поле для ввода комментария
-        yourComment.value = `> ${user.name}: ${user.comment}\n`;
+        yourComment.value = `> ${user.name}: ${user.comment}\n\nОтвет: `;
         // Ставим фокус на поле имени
         yourNameEl.focus();
       });
