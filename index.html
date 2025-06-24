@@ -105,6 +105,15 @@
       .replace(/'/g, "&#39;");
   }
 
+
+  // Удаляет все HTML-теги кроме <i>, <b>, <br>
+  // без этого не работает применение стиля для норм вида ответа
+  function sanitizeComment(str) {
+    return str
+      .replace(/<(?!\/?(i|b|br)\b)[^>]*>/gi, '')
+      .replace(/javascript:/gi, '');
+  }
+
   // Функция для рендера стоковых комментов 
   const renderUsers = () => {
 
@@ -126,21 +135,25 @@
 
         // Каждую строку цитаты экранируем
         // И соединяем обратно в текст с тегами <br> для переноса строк в HTML
-        quotedText = quoteLines.map(line => escapeHTML(line)).join('<br>');
+        quotedText = quoteLines.join('<br>');
 
-        // Отрезаем первые строки и соединяем обратно
-        actualComment = lines.slice(quoteLines.length).join('\n').trim();
+        //Обрабатываем основной текст комментария
+        actualComment = lines
+          .slice(quoteLines.length)
+          .join('\n')
+          .trim()
+          .replace(/\n/g, '<br>');
       }
 
       return `<li class="comment" data-index="${index}">
     <div class="comment-header">
-      <div>${escapeHTML(user.name)}</div>
+      <div>${user.name}</div>
       <div>${user.time}</div>
     </div>
     <div class="comment-body">
       <div class="comment-text">
         ${quotedText ? `<div class="comment-quote">${quotedText}</div>` : ''}
-        ${escapeHTML(actualComment)}
+        ${actualComment}
       </div>
     </div>
     <div class="comment-footer">
@@ -194,9 +207,9 @@
     if (name && comment) {
       // Добавляем новый комментарий к существующим с помощью обновления массива данных
       users.push({
-        name: yourNameEl.value,
+        name: escapeHTML(yourNameEl.value.trim()),
         time: date,
-        comment: yourComment.value,
+        comment: sanitizeComment(comment),
         numberLikes: 0,
         isLike: false
       });
