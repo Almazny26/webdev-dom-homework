@@ -105,15 +105,6 @@
       .replace(/'/g, "&#39;");
   }
 
-
-  // Удаляет все HTML-теги кроме <i>, <b>, <br>
-  // без этого не работает применение стиля для норм вида ответа
-  function sanitizeComment(str) {
-    return str
-      .replace(/<(?!\/?(i|b|br)\b)[^>]*>/gi, '')
-      .replace(/javascript:/gi, '');
-  }
-
   // Функция для рендера стоковых комментов 
   const renderUsers = () => {
 
@@ -125,13 +116,13 @@
       let actualComment = user.comment;
 
       // Если комментарий начинается с > — значит, это ответ с цитатой
-      if (user.comment.startsWith('>')) {
+      if (user.comment.startsWith('-')) {
 
         // Разбиваем весь комментарий на строки по переносу (\n)
         const lines = user.comment.split('\n');
 
         // Фильтруем строки, которые начинаются с символа '>'
-        const quoteLines = lines.filter(line => line.startsWith('>'));
+        const quoteLines = lines.filter(line => line.startsWith('-'));
 
         // Каждую строку цитаты экранируем
         // И соединяем обратно в текст с тегами <br> для переноса строк в HTML
@@ -209,7 +200,7 @@
       users.push({
         name: escapeHTML(yourNameEl.value.trim()),
         time: date,
-        comment: sanitizeComment(comment),
+        comment: escapeHTML(yourComment.value.trim()),
         numberLikes: 0,
         isLike: false
       });
@@ -237,7 +228,7 @@
         // Получаем объект пользователя (комментария) по индексу
         const user = users[index];
         // Формируем цитату: имя и текст комментария, и подставляем в поле для ввода комментария
-        yourComment.value = `> ${user.name}: ${user.comment}\n\nОтвет: `;
+        yourComment.value = `- ${user.name}: ${user.comment}\n\nОтвет: `;
         // Ставим фокус на поле имени
         yourNameEl.focus();
       });
