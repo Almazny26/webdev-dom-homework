@@ -1,6 +1,19 @@
-import { users } from './users.js'
+import { users, updateUsers } from './users.js'
 import { setLikeListeners } from './clickToLike.js'
 import { setCommentClickListeners } from './replyButton.js'
+
+// Загружаем комментарии с сервера
+fetch('https://wedev-api.sky.pro/api/v1/dmitry-karabanov/comments')
+    .then((response) => {
+        // Преобразуем ответ в JSON
+        return response.json()
+    })
+    .then((data) => {
+        // Обновляем массив пользователей данными с сервера
+        updateUsers(data.comments)
+        // Отрисовываем комментарии на странице
+        renderUsers()
+    })
 
 // Контейнер со всеми комментариями
 const commentsEl = document.querySelector('.comments')
@@ -10,12 +23,12 @@ export const renderUsers = () => {
         .map((user, index) => {
             // Разделение цитаты и комментария
             let quotedText = ''
-            let actualComment = user.comment
+            let actualComment = user.text
 
             // Если комментарий начинается с > — значит, это ответ с цитатой
-            if (user.comment.startsWith('-')) {
+            if (user.text.startsWith('-')) {
                 // Разбиваем весь комментарий на строки по переносу (\n)
-                const lines = user.comment.split('\n')
+                const lines = user.text.split('\n')
 
                 // Фильтруем строки, которые начинаются с символа '>'
                 const quoteLines = lines.filter((line) => line.startsWith('-'))
@@ -34,8 +47,8 @@ export const renderUsers = () => {
 
             return `<li class="comment" data-index="${index}">
     <div class="comment-header">
-      <div>${user.name}</div>
-      <div>${user.time}</div>
+      <div>${user.author.name}</div>
+      <div>${new Date(user.date).toLocaleDateString('ru-RU')} ${new Date(user.date).toLocaleTimeString('ru-RU')}</div>
     </div>
     <div class="comment-body">
       <div class="comment-text">
@@ -46,8 +59,8 @@ export const renderUsers = () => {
     <div class="comment-footer">
           <button class="answer">Ответить</button>
       <div class="likes">
-        <span class="likes-counter">${user.numberLikes}</span>
-        <button class="like-button${user.isLike ? ' -active-like' : ''}" data-index="${index}"></button>
+        <span class="likes-counter">${user.likes}</span>
+        <button class="like-button${user.isLiked ? ' -active-like' : ''}" data-index="${index}"></button>
       </div>
     </div>
   </li>`

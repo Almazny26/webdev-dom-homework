@@ -11,16 +11,16 @@ export const setLikeListeners = () => {
             event.stopPropagation()
 
             // Переключаем лайк: если уже лайкнуто — снимаем, иначе ставим лайк
-            if (users[index].isLike) {
+            if (users[index].isLiked) {
                 // Снимаем лайк
-                users[index].isLike = false
+                users[index].isLiked = false
                 // Уменьшаем счетчик
-                users[index].numberLikes--
+                users[index].likes--
             } else {
                 // Ставим лайк
-                users[index].isLike = true
+                users[index].isLiked = true
                 // Увеличиваем счетчик
-                users[index].numberLikes++
+                users[index].likes++
             }
             // Рендерим комменты после каждого нажатия на лайк
             renderUsers()

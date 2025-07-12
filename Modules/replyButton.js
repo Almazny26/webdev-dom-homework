@@ -18,7 +18,7 @@ export function setCommentClickListeners() {
             // Получаем объект пользователя (комментария) по индексу
             const user = users[index]
             // Формируем цитату: имя и текст комментария, и подставляем в поле для ввода комментария
-            yourComment.value = `- ${user.name}: ${user.comment}\n\nОтвет: `
+            yourComment.value = `- ${user.author.name}: ${user.text}\n\nОтвет: `
             // Ставим фокус на поле имени
             yourNameEl.focus()
         })

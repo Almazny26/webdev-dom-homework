@@ -1,5 +1,3 @@
-import { renderUsers } from './render.js'
-
 // Функция для экранирования HTML
 export function escapeHTML(str) {
     return str
@@ -9,4 +7,3 @@ export function escapeHTML(str) {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;')
 }
-renderUsers()

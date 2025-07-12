@@ -1,6 +1,5 @@
 import { users } from './users.js'
 import { escapeHTML } from './escapeHTML.js'
-import { date } from './date.js'
 import { renderUsers } from './render.js'
 
 const yourNameEl = document.getElementById('yourName')
@@ -10,7 +9,6 @@ const writeEl = document.getElementById('write')
 // Добавляем обработчик события клика на кнопку "Написать"
 export function write() {
     writeEl.addEventListener('click', function () {
-        console.log('cxtn')
         // Флаг наличия ошибки
         let hasError = false
         // Сброс состояния ошибок перед новой проверкой
@@ -39,11 +37,11 @@ export function write() {
         if (name && comment) {
             // Добавляем новый комментарий к существующим с помощью обновления массива данных
             users.push({
-                name: escapeHTML(yourNameEl.value.trim()),
-                time: date,
-                comment: escapeHTML(yourComment.value.trim()),
-                numberLikes: 0,
-                isLike: false,
+                author: { name: escapeHTML(yourNameEl.value.trim()) },
+                date: new Date().toISOString(),
+                text: escapeHTML(yourComment.value.trim()),
+                likes: 0,
+                isLiked: false,
             })
 
             renderUsers()
