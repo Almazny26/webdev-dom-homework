@@ -1,5 +1,4 @@
 import { users } from './users.js'
-import { escapeHTML } from './escapeHTML.js'
 import { renderUsers } from './render.js'
 
 const yourNameEl = document.getElementById('yourName')
@@ -35,20 +34,51 @@ export function write() {
 
         // Проверяем, что оба поля заполнены
         if (name && comment) {
-            // Добавляем новый комментарий к существующим с помощью обновления массива данных
-            users.push({
-                author: { name: escapeHTML(yourNameEl.value.trim()) },
-                date: new Date().toISOString(),
-                text: escapeHTML(yourComment.value.trim()),
-                likes: 0,
-                isLiked: false,
-            })
+            // Формируем объект с данными комментария для отправки на сервер
+            const commentData = {
+                // Текст комментария без лишних пробелов
+                text: comment.trim(),
+                // Имя пользователя без лишних пробелов
+                name: name.trim(),
+            }
 
-            renderUsers()
+            // Отправляем POST запрос на сервер для добавления комментария
+            fetch(
+                'https://wedev-api.sky.pro/api/v1/dmitry-karabanov/comments',
+                {
+                    // Метод для создания нового комментария
+                    method: 'POST',
+                    // Преобразуем данные в JSON
+                    body: JSON.stringify(commentData),
+                },
+            )
+                .then((response) => {
+                    // Получаем ответ от сервера в формате JSON
+                    return response.json()
+                })
+                .then((data) => {
+                    // После успешного добавления комментария загружаем обновленный список
+                    return fetch(
+                        'https://wedev-api.sky.pro/api/v1/dmitry-karabanov/comments',
+                    )
+                })
+                .then((response) => {
+                    // Преобразуем ответ в JSON
+                    return response.json()
+                })
+                .then((data) => {
+                    // Обновляем локальный массив комментариев данными с сервера
+                    // Очищаем старые данные
+                    users.length = 0
+                    // Добавляем новые данные
+                    users.push(...data.comments)
+                    // Перерисовываем комментарии на странице
+                    renderUsers()
 
-            // Очищаем поля ввода после добавления комментария
-            yourNameEl.value = ''
-            yourComment.value = ''
+                    // Очищаем поля ввода после успешного добавления
+                    yourNameEl.value = ''
+                    yourComment.value = ''
+                })
         }
     })
 }

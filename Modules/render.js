@@ -48,7 +48,7 @@ export const renderUsers = () => {
             return `<li class="comment" data-index="${index}">
     <div class="comment-header">
       <div>${user.author.name}</div>
-      <div>${new Date(user.date).toLocaleDateString('ru-RU')} ${new Date(user.date).toLocaleTimeString('ru-RU')}</div>
+      <div>${new Date(user.date).toLocaleDateString('ru-RU', { timeZone: 'UTC' })} ${new Date(user.date).toLocaleTimeString('ru-RU', { timeZone: 'UTC' })}</div>
     </div>
     <div class="comment-body">
       <div class="comment-text">
