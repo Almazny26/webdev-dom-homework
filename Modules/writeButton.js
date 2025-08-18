@@ -40,7 +40,8 @@ export function write() {
                 // Имя пользователя без лишних пробелов
                 name: name.trim(),
             }
-
+            writeEl.disabled = true
+            writeEl.textContent = 'Публикация...'
             // Отправляем POST запрос на сервер для добавления комментария
             fetch(
                 'https://wedev-api.sky.pro/api/v1/dmitry-karabanov/comments',
@@ -59,6 +60,9 @@ export function write() {
                     // Очищаем поля ввода после успешного добавления
                     yourNameEl.value = ''
                     yourComment.value = ''
+
+                    writeEl.disabled = false
+                    writeEl.textContent = 'Написать'
                 })
         }
     })
