@@ -1,5 +1,4 @@
-import { users } from './users.js'
-import { renderUsers } from './render.js'
+import { fetchAndRenderTasks } from './fetchAndRenderTasks.js'
 
 const yourNameEl = document.getElementById('yourName')
 const yourComment = document.getElementById('yourComment')
@@ -52,29 +51,11 @@ export function write() {
                     body: JSON.stringify(commentData),
                 },
             )
-                .then((response) => {
-                    // Получаем ответ от сервера в формате JSON
-                    return response.json()
-                })
-                .then((data) => {
+                .then(() => {
                     // После успешного добавления комментария загружаем обновленный список
-                    return fetch(
-                        'https://wedev-api.sky.pro/api/v1/dmitry-karabanov/comments',
-                    )
+                    return fetchAndRenderTasks()
                 })
-                .then((response) => {
-                    // Преобразуем ответ в JSON
-                    return response.json()
-                })
-                .then((data) => {
-                    // Обновляем локальный массив комментариев данными с сервера
-                    // Очищаем старые данные
-                    users.length = 0
-                    // Добавляем новые данные
-                    users.push(...data.comments)
-                    // Перерисовываем комментарии на странице
-                    renderUsers()
-
+                .then(() => {
                     // Очищаем поля ввода после успешного добавления
                     yourNameEl.value = ''
                     yourComment.value = ''

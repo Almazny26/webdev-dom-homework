@@ -1,6 +1,5 @@
 import { users } from './users.js'
 import { renderUsers } from './render.js'
-
 // Обработка клика по лайку
 export const setLikeListeners = () => {
     // Находим все лайки по классу

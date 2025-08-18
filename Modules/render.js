@@ -1,19 +1,9 @@
-import { users, updateUsers } from './users.js'
+import { users } from './users.js'
 import { setLikeListeners } from './clickToLike.js'
 import { setCommentClickListeners } from './replyButton.js'
+import { fetchAndRenderTasks } from './fetchAndRenderTasks.js'
 
-// Загружаем комментарии с сервера
-fetch('https://wedev-api.sky.pro/api/v1/dmitry-karabanov/comments')
-    .then((response) => {
-        // Преобразуем ответ в JSON
-        return response.json()
-    })
-    .then((data) => {
-        // Обновляем массив пользователей данными с сервера
-        updateUsers(data.comments)
-        // Отрисовываем комментарии на странице
-        renderUsers()
-    })
+fetchAndRenderTasks()
 
 // Контейнер со всеми комментариями
 const commentsEl = document.querySelector('.comments')
