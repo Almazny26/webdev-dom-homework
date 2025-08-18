@@ -50,7 +50,7 @@ export const renderUsers = () => {
           <button class="answer">Ответить</button>
       <div class="likes">
         <span class="likes-counter">${user.likes}</span>
-        <button class="like-button${user.isLiked ? ' -active-like' : ''}" data-index="${index}"></button>
+        <button class="like-button${user.isLiked ? ' -active-like' : ''}${user.isLikeLoading ? ' -loading-like' : ''}" data-index="${index}" data-loading="${user.isLikeLoading}"></button>
       </div>
     </div>
   </li>`

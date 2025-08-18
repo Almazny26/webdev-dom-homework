@@ -15,8 +15,14 @@ export const fetchAndRenderTasks = () => {
             return response.json()
         })
         .then((data) => {
+            // Инициализируем свойство isLikeLoading для каждого комментария
+            const commentsWithLoading = data.comments.map((comment) => ({
+                ...comment,
+                isLikeLoading: false,
+            }))
+
             // Обновляем массив пользователей данными с сервера
-            updateUsers(data.comments)
+            updateUsers(commentsWithLoading)
             // Отрисовываем комментарии на странице
             renderUsers()
 
