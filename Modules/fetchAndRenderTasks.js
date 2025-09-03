@@ -11,6 +11,21 @@ export const fetchAndRenderTasks = () => {
     // Загружаем комментарии с сервера
     return fetch('https://wedev-api.sky.pro/api/v1/dmitry-karabanov/comments')
         .then((response) => {
+            // Проверяем статус ответа
+            if (response.status === 500) {
+                // Обработка 500-й ошибки (ошибка сервера)
+                alert(
+                    'Ошибка сервера при загрузке комментариев. Попробуйте обновить страницу позже.',
+                )
+                throw new Error('500 Internal Server Error')
+            }
+
+            if (!response.ok) {
+                // Обработка других ошибок
+                alert(`Ошибка при загрузке комментариев: ${response.status}`)
+                throw new Error(`HTTP error! status: ${response.status}`)
+            }
+
             // Преобразуем ответ в JSON
             return response.json()
         })
@@ -33,6 +48,21 @@ export const fetchAndRenderTasks = () => {
         })
         .catch((error) => {
             console.error('Ошибка при загрузке комментариев:', error)
+
+            // Обработка ошибок сети и других ошибок
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                // Ошибка сети (нет интернета)
+                alert(
+                    'Ошибка сети при загрузке комментариев. Проверьте подключение к интернету и попробуйте обновить страницу.',
+                )
+            } else if (error.message.includes('500')) {
+                // 500-я ошибка уже обработана выше
+                console.log('500-я ошибка обработана')
+            } else if (!error.message.includes('HTTP error')) {
+                // Другие ошибки (кроме уже обработанных HTTP ошибок)
+                alert('Произошла неизвестная ошибка при загрузке комментариев.')
+            }
+
             // Скрываем индикатор загрузки даже при ошибке
             if (loadingEl) {
                 loadingEl.classList.add('hidden')
