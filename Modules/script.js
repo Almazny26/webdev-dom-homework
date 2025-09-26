@@ -1,5 +1,4 @@
-import { renderUsers } from './render.js'
-import { write } from './writeButton.js'
+import { renderMainPage } from './mainPage.js'
 
-renderUsers()
-write()
+// Инициализируем приложение
+renderMainPage()

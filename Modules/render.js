@@ -1,14 +1,11 @@
 import { users } from './users.js'
 import { setLikeListeners } from './clickToLike.js'
 import { setCommentClickListeners } from './replyButton.js'
-import { fetchAndRenderTasks } from './fetchAndRenderTasks.js'
 
-fetchAndRenderTasks()
-
-// Контейнер со всеми комментариями
-const commentsEl = document.querySelector('.comments')
 // Функция для рендера стоковых комментов
 export const renderUsers = () => {
+    // Контейнер со всеми комментариями
+    const commentsEl = document.querySelector('.comments')
     const usersHtml = users
         .map((user, index) => {
             // Разделение цитаты и комментария
@@ -57,7 +54,9 @@ export const renderUsers = () => {
         })
         .join('')
 
-    commentsEl.innerHTML = usersHtml
+    if (commentsEl) {
+        commentsEl.innerHTML = usersHtml
+    }
     // Обработчик лайка
     setLikeListeners()
     // Обработчик клика на кнопку "Ответить"

@@ -1,7 +1,15 @@
 import { renderUsers } from './render.js'
 import { updateUsers } from './users.js'
 
+let isLoading = false
+
 export const fetchAndRenderTasks = () => {
+    if (isLoading) {
+        return Promise.resolve()
+    }
+
+    isLoading = true
+
     // Показываем индикатор загрузки
     const loadingEl = document.getElementById('loading')
     if (loadingEl) {
@@ -9,7 +17,7 @@ export const fetchAndRenderTasks = () => {
     }
 
     // Загружаем комментарии с сервера
-    return fetch('https://wedev-api.sky.pro/api/v1/dmitry-karabanov/comments')
+    return fetch('https://wedev-api.sky.pro/api/v2/dmitry-karabanov/comments')
         .then((response) => {
             // Проверяем статус ответа
             if (response.status === 500) {
@@ -45,10 +53,9 @@ export const fetchAndRenderTasks = () => {
             if (loadingEl) {
                 loadingEl.classList.add('hidden')
             }
+            isLoading = false
         })
         .catch((error) => {
-            console.error('Ошибка при загрузке комментариев:', error)
-
             // Обработка ошибок сети и других ошибок
             if (error.name === 'TypeError' && error.message.includes('fetch')) {
                 // Ошибка сети (нет интернета)
@@ -57,7 +64,6 @@ export const fetchAndRenderTasks = () => {
                 )
             } else if (error.message.includes('500')) {
                 // 500-я ошибка уже обработана выше
-                console.log('500-я ошибка обработана')
             } else if (!error.message.includes('HTTP error')) {
                 // Другие ошибки (кроме уже обработанных HTTP ошибок)
                 alert('Произошла неизвестная ошибка при загрузке комментариев.')
@@ -67,5 +73,6 @@ export const fetchAndRenderTasks = () => {
             if (loadingEl) {
                 loadingEl.classList.add('hidden')
             }
+            isLoading = false
         })
 }

@@ -1,15 +1,20 @@
 // Функция для отправки комментария с автоматическим повтором при ошибке 500
 export const postComment = (
     text,
-    name,
     retryCount = 0,
     maxRetries = 3,
     timeout = 10000,
 ) => {
+    // Получаем данные пользователя из LocalStorage
+    const userData = localStorage.getItem('user')
+    if (!userData) {
+        throw new Error('Пользователь не авторизован')
+    }
+
+    const user = JSON.parse(userData)
+
     const commentData = {
         text: text.trim(),
-        name: name.trim(),
-        forceError: true,
     }
 
     // Создаем Promise с таймаутом
@@ -20,9 +25,12 @@ export const postComment = (
     })
 
     const fetchPromise = fetch(
-        'https://wedev-api.sky.pro/api/v1/dmitry-karabanov/comments',
+        'https://wedev-api.sky.pro/api/v2/dmitry-karabanov/comments',
         {
             method: 'POST',
+            headers: {
+                Authorization: `Bearer ${user.token}`,
+            },
             body: JSON.stringify(commentData),
         },
     )
@@ -32,23 +40,29 @@ export const postComment = (
             // Проверяем статус ответа
             if (response.status === 400) {
                 // Обработка 400-й ошибки (некорректные данные)
-                alert(
-                    'Ошибка: введены некорректные данные. Проверьте, что имя и комментарий не слишком короткие.',
-                )
-                throw new Error('400 Bad Request')
+                return response
+                    .json()
+                    .then((errorData) => {
+                        alert(
+                            `Ошибка: ${errorData.error || 'Комментарий должен содержать минимум 3 символа'}`,
+                        )
+                        throw new Error('400 Bad Request')
+                    })
+                    .catch((e) => {
+                        alert(
+                            'Ошибка: комментарий должен содержать минимум 3 символа.',
+                        )
+                        throw new Error('400 Bad Request')
+                    })
             }
 
             if (response.status === 500) {
                 // Обработка 500-й ошибки (ошибка сервера) - только в консоль
-                console.log(
-                    `Ошибка сервера (попытка ${retryCount + 1}/${maxRetries + 1}). Повторяем запрос...`,
-                )
 
                 if (retryCount < maxRetries) {
                     // Автоматически повторяем запрос при ошибке 500
                     return postComment(
                         text,
-                        name,
                         retryCount + 1,
                         maxRetries,
                         timeout,
@@ -72,15 +86,10 @@ export const postComment = (
         })
         .catch((error) => {
             if (error.message === 'Таймаут запроса') {
-                console.log(
-                    `Таймаут запроса (попытка ${retryCount + 1}/${maxRetries + 1})`,
-                )
-
                 if (retryCount < maxRetries) {
                     // Повторяем запрос при таймауте
                     return postComment(
                         text,
-                        name,
                         retryCount + 1,
                         maxRetries,
                         timeout,

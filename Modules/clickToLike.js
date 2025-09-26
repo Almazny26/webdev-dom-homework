@@ -1,5 +1,6 @@
 import { users } from './users.js'
 import { renderUsers } from './render.js'
+import { getCurrentUser } from './mainPage.js'
 
 // Функция для имитации задержки API
 function delay(interval = 300) {
@@ -19,13 +20,15 @@ export const setLikeListeners = () => {
             // Предотвращаем всплытие события
             event.stopPropagation()
 
-            // Проверяем, что элемент существует в массиве
-            if (!users[index]) {
-                console.error(
-                    `Элемент с индексом ${index} не найден в массиве users`,
-                )
+            // Проверяем авторизацию пользователя
+            const currentUser = getCurrentUser()
+            if (!currentUser) {
+                alert('Для оценки комментариев необходимо авторизоваться')
                 return
             }
+
+            // Проверяем, что элемент существует в массиве
+            if (!users[index]) return
 
             // Проверяем, что лайк уже не в процессе загрузки
             if (users[index].isLikeLoading) {
@@ -54,7 +57,6 @@ export const setLikeListeners = () => {
                     users[index].likes++
                 }
             } catch (error) {
-                console.error('Ошибка при обработке лайка:', error)
             } finally {
                 // Снимаем флаг загрузки
                 users[index].isLikeLoading = false

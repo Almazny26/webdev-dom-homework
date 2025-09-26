@@ -1,45 +1,50 @@
 import { fetchAndRenderTasks } from './fetchAndRenderTasks.js'
 import { postComment } from './postComment.js'
 
-const yourNameEl = document.getElementById('yourName')
-const yourComment = document.getElementById('yourComment')
-const writeEl = document.getElementById('write')
-
 // Переменные для сохранения данных формы
 let savedName = ''
 let savedComment = ''
 
 // Функция для восстановления данных формы
 function restoreFormData() {
-    yourNameEl.value = savedName
-    yourComment.value = savedComment
+    const yourNameEl = document.getElementById('yourName')
+    const yourComment = document.getElementById('yourComment')
+    if (yourNameEl) yourNameEl.value = savedName
+    if (yourComment) yourComment.value = savedComment
 }
 
 // Функция для сохранения данных формы
 function saveFormData() {
-    savedName = yourNameEl.value
-    savedComment = yourComment.value
+    const yourNameEl = document.getElementById('yourName')
+    const yourComment = document.getElementById('yourComment')
+    if (yourNameEl) savedName = yourNameEl.value
+    if (yourComment) savedComment = yourComment.value
 }
-
-// Добавляем обработчики событий input для отслеживания изменений
-yourNameEl.addEventListener('input', saveFormData)
-yourComment.addEventListener('input', saveFormData)
 
 // Функция для обработки клика на кнопку "Написать"
 const handlePostClick = () => {
+    const yourNameEl = document.getElementById('yourName')
+    const yourComment = document.getElementById('yourComment')
+    const writeEl = document.getElementById('write')
+
+    if (!yourNameEl || !yourComment || !writeEl) {
+        return
+    }
+
     // Флаг наличия ошибки
     let hasError = false
     // Сброс состояния ошибок перед новой проверкой
     yourNameEl.classList.remove('error')
     yourComment.classList.remove('error')
 
-    // Проверка имени
-    if (yourNameEl.value.trim() === '') {
-        yourNameEl.classList.add('error')
+    // Проверка комментария (в API v2 проверяем только текст комментария)
+    if (yourComment.value.trim() === '') {
+        yourComment.classList.add('error')
         hasError = true
     }
-    // Проверка комментария
-    if (yourComment.value.trim() === '') {
+
+    // Проверка минимальной длины комментария (API требует минимум 3 символа)
+    if (yourComment.value.trim().length < 3) {
         yourComment.classList.add('error')
         hasError = true
     }
@@ -61,17 +66,25 @@ const handlePostClick = () => {
         writeEl.textContent = 'Публикация...'
 
         // Используем функцию postComment с автоматическим повтором при ошибке 500
-        postComment(comment, name)
+        postComment(comment)
             .then(() => {
                 // После успешного добавления комментария загружаем обновленный список
                 return fetchAndRenderTasks()
             })
             .then(() => {
-                // Очищаем поля ввода после успешного добавления
-                yourNameEl.value = ''
-                yourComment.value = ''
-                // Очищаем сохраненные данные
-                savedName = ''
+                // После успешной отправки оставляем имя авторизованного пользователя,
+                // очищаем только текст комментария
+                const currentUser = JSON.parse(
+                    localStorage.getItem('user') || '{}',
+                )
+                if (currentUser && currentUser.name && yourNameEl) {
+                    yourNameEl.value = currentUser.name
+                }
+                if (yourComment) {
+                    yourComment.value = ''
+                }
+                // Обновляем сохраненные данные
+                savedName = yourNameEl ? yourNameEl.value : ''
                 savedComment = ''
 
                 writeEl.disabled = false
@@ -109,5 +122,21 @@ const handlePostClick = () => {
 
 // Добавляем обработчик события клика на кнопку "Написать"
 export function write() {
+    const writeEl = document.getElementById('write')
+    const yourNameEl = document.getElementById('yourName')
+    const yourComment = document.getElementById('yourComment')
+
+    if (!writeEl) {
+        return
+    }
+
+    // Добавляем обработчики событий input для отслеживания изменений
+    if (yourNameEl) {
+        yourNameEl.addEventListener('input', saveFormData)
+    }
+    if (yourComment) {
+        yourComment.addEventListener('input', saveFormData)
+    }
+
     writeEl.addEventListener('click', handlePostClick)
 }
