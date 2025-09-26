@@ -1,0 +1,64 @@
+import { users } from './users.js'
+import { setLikeListeners } from './clickToLike.js'
+import { setCommentClickListeners } from './replyButton.js'
+
+// Функция для рендера стоковых комментов
+export const renderUsers = () => {
+    // Контейнер со всеми комментариями
+    const commentsEl = document.querySelector('.comments')
+    const usersHtml = users
+        .map((user, index) => {
+            // Разделение цитаты и комментария
+            let quotedText = ''
+            let actualComment = user.text
+
+            // Если комментарий начинается с > — значит, это ответ с цитатой
+            if (user.text.startsWith('-')) {
+                // Разбиваем весь комментарий на строки по переносу (\n)
+                const lines = user.text.split('\n')
+
+                // Фильтруем строки, которые начинаются с символа '>'
+                const quoteLines = lines.filter((line) => line.startsWith('-'))
+
+                // Каждую строку цитаты экранируем
+                // И соединяем обратно в текст с тегами <br> для переноса строк в HTML
+                quotedText = quoteLines.join('<br>')
+
+                //Обрабатываем основной текст комментария
+                actualComment = lines
+                    .slice(quoteLines.length)
+                    .join('\n')
+                    .trim()
+                    .replace(/\n/g, '<br>')
+            }
+
+            return `<li class="comment" data-index="${index}">
+    <div class="comment-header">
+      <div>${user.author.name}</div>
+      <div>${new Date(user.date).toLocaleDateString('ru-RU', { timeZone: 'UTC' })} ${new Date(user.date).toLocaleTimeString('ru-RU', { timeZone: 'UTC' })}</div>
+    </div>
+    <div class="comment-body">
+      <div class="comment-text">
+        ${quotedText ? `<div class="comment-quote">${quotedText}</div>` : ''}
+        ${actualComment}
+      </div>
+    </div>
+    <div class="comment-footer">
+          <button class="answer">Ответить</button>
+      <div class="likes">
+        <span class="likes-counter">${user.likes}</span>
+        <button class="like-button${user.isLiked ? ' -active-like' : ''}${user.isLikeLoading ? ' -loading-like' : ''}" data-index="${index}" data-loading="${user.isLikeLoading}"></button>
+      </div>
+    </div>
+  </li>`
+        })
+        .join('')
+
+    if (commentsEl) {
+        commentsEl.innerHTML = usersHtml
+    }
+    // Обработчик лайка
+    setLikeListeners()
+    // Обработчик клика на кнопку "Ответить"
+    setCommentClickListeners()
+}
